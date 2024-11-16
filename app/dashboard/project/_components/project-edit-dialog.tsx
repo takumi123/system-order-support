@@ -28,25 +28,16 @@ import { Textarea } from "@/components/ui/textarea"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import * as z from "zod"
+import { updateProject } from "../_actions/project"
+import { Project } from "../types"
 
 const formSchema = z.object({
   name: z.string().min(1, "プロジェクト名は必須です"),
-  status: z.string().min(1, "ステータスは必須です"),
-  startDate: z.string().min(1, "開始日は必須です"),
-  endDate: z.string().min(1, "終了日は必須です"),
-  members: z.string().min(1, "メンバーは必須です"),
-  description: z.string().min(1, "プロジェクト概要は必須です"),
+  description: z.string().optional(),
+  status: z.enum(["ACTIVE", "ARCHIVED", "COMPLETED"], {
+    required_error: "ステータスは必須です",
+  }),
 })
-
-interface Project {
-  id: number
-  name: string
-  status: string
-  startDate: string
-  endDate: string
-  members: string[]
-  description: string
-}
 
 interface ProjectEditDialogProps {
   project: Project
@@ -63,18 +54,16 @@ export function ProjectEditDialog({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: project.name,
+      description: project.description || "",
       status: project.status,
-      startDate: project.startDate,
-      endDate: project.endDate,
-      members: project.members.join(", "),
-      description: project.description,
     },
   })
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    // TODO: APIを呼び出してプロジェクトを更新
-    console.log(values)
-    onOpenChange(false)
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    const result = await updateProject(project.id, values)
+    if (result.success) {
+      onOpenChange(false)
+    }
   }
 
   return (
@@ -114,52 +103,11 @@ export function ProjectEditDialog({
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="計画中">計画中</SelectItem>
-                      <SelectItem value="進行中">進行中</SelectItem>
-                      <SelectItem value="完了">完了</SelectItem>
+                      <SelectItem value="ACTIVE">進行中</SelectItem>
+                      <SelectItem value="ARCHIVED">アーカイブ</SelectItem>
+                      <SelectItem value="COMPLETED">完了</SelectItem>
                     </SelectContent>
                   </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <div className="grid grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="startDate"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>開始日</FormLabel>
-                    <FormControl>
-                      <Input type="date" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="endDate"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>終了日</FormLabel>
-                    <FormControl>
-                      <Input type="date" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-            <FormField
-              control={form.control}
-              name="members"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>メンバー</FormLabel>
-                  <FormControl>
-                    <Input {...field} placeholder="メンバーをカンマ区切りで入力" />
-                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}

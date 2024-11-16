@@ -1,5 +1,6 @@
 "use client"
 
+import { Button } from "@/components/ui/button"
 import {
   Dialog,
   DialogContent,
@@ -8,17 +9,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import { Button } from "@/components/ui/button"
-
-interface Project {
-  id: number
-  name: string
-  status: string
-  startDate: string
-  endDate: string
-  members: string[]
-  description: string
-}
+import { deleteProject } from "../_actions/project"
+import { Project } from "../types"
 
 interface ProjectDeleteDialogProps {
   project: Project
@@ -31,10 +23,11 @@ export function ProjectDeleteDialog({
   open,
   onOpenChange,
 }: ProjectDeleteDialogProps) {
-  const handleDelete = async () => {
-    // TODO: APIを呼び出してプロジェクトを削除
-    console.log(`Deleting project: ${project.id}`)
-    onOpenChange(false)
+  async function onDelete() {
+    const result = await deleteProject(project.id)
+    if (result.success) {
+      onOpenChange(false)
+    }
   }
 
   return (
@@ -50,7 +43,7 @@ export function ProjectDeleteDialog({
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             キャンセル
           </Button>
-          <Button variant="destructive" onClick={handleDelete}>
+          <Button variant="destructive" onClick={onDelete}>
             削除
           </Button>
         </DialogFooter>

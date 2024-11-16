@@ -2,6 +2,7 @@
 
 import { prisma } from "@/lib/prisma"
 import { revalidatePath } from "next/cache"
+import { Project } from "../types"
 
 export async function getProjects() {
   try {
@@ -12,12 +13,13 @@ export async function getProjects() {
   }
 }
 
-export async function getProject(id: string) {
+export async function getProject(id: string): Promise<{ project?: Project; error?: string }> {
   try {
     const project = await prisma.project.findUnique({
       where: { id }
-    })
-    return { project }
+    }) as Project | null
+
+    return { project: project || undefined }
   } catch (error) {
     return { error: `プロジェクトの取得に失敗しました: ${error instanceof Error ? error.message : String(error)}` }
   }
