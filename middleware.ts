@@ -1,9 +1,21 @@
-import { auth } from "./app/auth"
+import { NextResponse } from "next/server";
+import { auth } from "./app/auth";
 
-export default auth
+export default async function middleware(req: Request) {
+  const session = await auth();
+  const isAuthPage = req.url.includes("/auth");
+
+  if (!session && !isAuthPage) {
+    return NextResponse.redirect(new URL("/auth/login", req.url));
+  }
+
+  if (session && isAuthPage) {
+    return NextResponse.redirect(new URL("/dashboard/project", req.url));
+  }
+
+  return NextResponse.next();
+}
 
 export const config = {
-  matcher: [
-    "/((?!_next/static|_next/image|favicon.ico|auth/.*|api/auth/.*).*)",
-  ],
-}
+  matcher: ["/dashboard/:path*", "/auth/:path*"],
+};

@@ -22,7 +22,6 @@ model User {
 
   accounts      Account[]
   sessions      Session[]
-  memberships   TeamMembership[]
 }
 
 model Account {
@@ -60,52 +59,11 @@ model VerificationToken {
   @@unique([identifier, token])
 }
 
-model Team {
-  id          String    @id @default(cuid())
-  name        String
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  
-  subscription Subscription?
-  members      TeamMembership[]
-  projects     Project[]
-}
-
-model TeamMembership {
-  id        String    @id @default(cuid())
-  role      String    // ADMIN, MEMBER
-  teamId    String
-  userId    String
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-
-  team      Team      @relation(fields: [teamId], references: [id], onDelete: Cascade)
-  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([teamId, userId])
-}
-
-model Subscription {
-  id        String    @id @default(cuid())
-  teamId    String    @unique
-  plan      String    // FREE, PRO, ENTERPRISE
-  status    String    // ACTIVE, CANCELED, PAST_DUE
-  startDate DateTime  @default(now())
-  endDate   DateTime?
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-
-  team      Team      @relation(fields: [teamId], references: [id], onDelete: Cascade)
-}
-
 model Project {
-  id          String    @id @default(cuid())
+  id          String   @id @default(cuid())
   name        String
   description String?
-  status      String    // ACTIVE, ARCHIVED, COMPLETED
-  teamId      String
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-
-  team        Team      @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  status      String   // ACTIVE, ARCHIVED, COMPLETED
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }

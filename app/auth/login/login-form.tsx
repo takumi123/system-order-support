@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { signIn } from "@/app/auth"
+import { signIn } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 
@@ -32,7 +32,7 @@ export default function LoginForm() {
         return
       }
 
-      router.push("/")
+      router.push("/dashboard/project")
       router.refresh()
     } catch  {
       setError("ログイン中にエラーが発生しました")
@@ -40,9 +40,17 @@ export default function LoginForm() {
     }
   }
 
-  const handleGoogleLogin = () => {
-    setIsLoading(true)
-    signIn("google", { callbackUrl: "/" })
+  const handleGoogleLogin = async () => {
+    try {
+      setIsLoading(true)
+      await signIn("google", { 
+        callbackUrl: "/dashboard/project",
+        redirect: true
+      })
+    } catch {
+      setError("Googleログイン中にエラーが発生しました")
+      setIsLoading(false)
+    }
   }
 
   return (
