@@ -74,7 +74,7 @@ export default function RegisterForm() {
         return
       }
 
-      router.push("/")
+      router.push("/dashboard/project")
       router.refresh()
     } catch (error) {
       console.error("Registration error:", error) // デバッグログを追加
@@ -89,7 +89,7 @@ export default function RegisterForm() {
 
   const handleGoogleRegister = () => {
     setIsLoading(true)
-    signIn("google", { callbackUrl: "/" })
+    signIn("google", { callbackUrl: "/dashboard/project" })
   }
 
   return (
