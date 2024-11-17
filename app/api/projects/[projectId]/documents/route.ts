@@ -43,13 +43,6 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    // TODO: Vertex Gemini APIを使用してドキュメントを分析
-    // const analysis = await analyzeDocument(url);
-    // await prisma.requirementDocument.update({
-    //   where: { id: document.id },
-    //   data: { analysis },
-    // });
-
     return NextResponse.json(document);
   } catch (error) {
     console.error("ドキュメントアップロードエラー:", error);
