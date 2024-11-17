@@ -5,6 +5,7 @@ import { Card } from "@/components/ui/card";
 import { Upload, Trash2, Search } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { getDocuments } from "../_actions/requirements";
+import RequirementsGenerator from "./requirements-generator";
 
 type Document = {
   id: string;
@@ -13,7 +14,25 @@ type Document = {
   blobUrl: string;
   analysis: string | null;
   createdAt: string;
+  projectId: string;
 };
+
+// APIから返されるドキュメントの型
+interface APIDocument {
+  id: string;
+  name: string;
+  url: string;
+  blobUrl: string;
+  analysis: string | null;
+  createdAt: Date;
+  projectId: string;
+}
+
+interface AnalysisResult {
+  documentId: string;
+  analysis: string;
+  error?: string;
+}
 
 interface RequirementsContentProps {
   projectId: string;
@@ -30,7 +49,12 @@ export default function RequirementsContent({ projectId }: RequirementsContentPr
   const loadData = useCallback(async () => {
     try {
       const documentsData = await getDocuments(projectId);
-      setDocuments(documentsData);
+      // Date型をstring型に変換
+      const formattedDocuments = documentsData.map((doc: APIDocument) => ({
+        ...doc,
+        createdAt: doc.createdAt.toISOString()
+      }));
+      setDocuments(formattedDocuments);
     } catch (error) {
       console.error("データの読み込みに失敗しました:", error);
     } finally {
@@ -61,7 +85,13 @@ export default function RequirementsContent({ projectId }: RequirementsContentPr
       }
 
       const newDocument = await response.json();
-      setDocuments([newDocument, ...documents]);
+      setDocuments([
+        {
+          ...newDocument,
+          createdAt: new Date(newDocument.createdAt).toISOString()
+        },
+        ...documents
+      ]);
     } catch (error) {
       console.error("ドキュメントのアップロードに失敗しました:", error);
     } finally {
@@ -124,7 +154,7 @@ export default function RequirementsContent({ projectId }: RequirementsContentPr
       
       // 分析結果を反映
       setDocuments(documents.map(doc => {
-        const result = results.find((r: any) => r.documentId === doc.id);
+        const result = results.find((r: AnalysisResult) => r.documentId === doc.id);
         if (result && !result.error) {
           return { ...doc, analysis: result.analysis };
         }
@@ -169,6 +199,8 @@ export default function RequirementsContent({ projectId }: RequirementsContentPr
 
   return (
     <div className="space-y-4">
+      <RequirementsGenerator projectId={projectId} />
+      
       <Card className="p-6">
         <div className="flex flex-col items-center justify-center space-y-4">
           <div className="text-center">
