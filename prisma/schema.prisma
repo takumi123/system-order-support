@@ -27,7 +27,6 @@ model User {
 
 model Account {
   id                String  @id @default(cuid())
-  userId            String
   type              String
   provider          String
   providerAccountId String
@@ -38,6 +37,7 @@ model Account {
   scope             String?
   id_token          String? @db.Text
   session_state     String?
+  userId            String
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -70,6 +70,15 @@ model Project {
 
   requirementCategories RequirementCategory[]
   requirementDocuments  RequirementDocument[]
+  wireframeCategories   WireframeCategory[]
+  schedules            ProjectSchedule[]
+  budgets              ProjectBudget[]
+  functions            ProjectFunction[]
+  usecases            ProjectUsecase[]
+  actors              ProjectActor[]
+  vendors             Vendor[]
+  rfps                RFP[]
+  uatScenarios        UATScenario[]
 }
 
 model RequirementCategory {
@@ -116,4 +125,173 @@ model RequirementDocument {
   updatedAt   DateTime @updatedAt
 
   project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+}
+
+model WireframeCategory {
+  id          String   @id @default(cuid())
+  name        String
+  type        String   // SCREEN, COMMON
+  projectId   String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  project     Project     @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  wireframes  Wireframe[]
+}
+
+model Wireframe {
+  id          String   @id @default(cuid())
+  name        String
+  svgData     String   @db.Text
+  categoryId  String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  category    WireframeCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+}
+
+model ProjectSchedule {
+  id          String   @id @default(cuid())
+  name        String
+  startDate   DateTime
+  endDate     DateTime
+  phase       String   // REQUIREMENTS, DESIGN, DEVELOPMENT, TESTING
+  status      String   // NOT_STARTED, IN_PROGRESS, COMPLETED, ON_HOLD
+  projectId   String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+}
+
+model ProjectBudget {
+  id          String   @id @default(cuid())
+  phase       String   // REQUIREMENTS, DESIGN, DEVELOPMENT, TESTING
+  amount      Float
+  used        Float    @default(0)
+  projectId   String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+}
+
+model ProjectFunction {
+  id          String   @id @default(cuid())
+  category    String
+  name        String
+  description String   @db.Text
+  priority    String   // HIGH, MEDIUM, LOW
+  status      String   // NOT_STARTED, IN_PROGRESS, COMPLETED, ON_HOLD
+  projectId   String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+}
+
+model ProjectActor {
+  id          String   @id @default(cuid())
+  name        String
+  description String   @db.Text
+  projectId   String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  usecases    ProjectUsecase[]
+}
+
+model ProjectUsecase {
+  id          String   @id @default(cuid())
+  name        String
+  description String   @db.Text
+  precondition String? @db.Text
+  postcondition String? @db.Text
+  mainFlow    String   @db.Text
+  alternativeFlow String? @db.Text
+  projectId   String
+  actorId     String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  actor       ProjectActor @relation(fields: [actorId], references: [id], onDelete: Cascade)
+}
+
+model Vendor {
+  id          String   @id @default(cuid())
+  name        String
+  description String   @db.Text
+  status      String   // EVALUATING, SELECTED, REJECTED
+  projectId   String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  evaluations VendorEvaluation[]
+}
+
+model VendorEvaluation {
+  id          String   @id @default(cuid())
+  category    String   // TECHNICAL, COST, EXPERIENCE, SUPPORT
+  score       Int      // 1-5
+  comment     String   @db.Text
+  vendorId    String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  vendor      Vendor   @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+}
+
+model RFP {
+  id          String   @id @default(cuid())
+  title       String
+  content     String   @db.Text
+  status      String   // DRAFT, SENT, RECEIVED_RESPONSE
+  projectId   String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  sections    RFPSection[]
+}
+
+model RFPSection {
+  id          String   @id @default(cuid())
+  title       String
+  content     String   @db.Text
+  order       Int
+  rfpId       String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  rfp         RFP      @relation(fields: [rfpId], references: [id], onDelete: Cascade)
+}
+
+model UATScenario {
+  id          String   @id @default(cuid())
+  title       String
+  description String   @db.Text
+  status      String   // NOT_STARTED, IN_PROGRESS, PASSED, FAILED
+  projectId   String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  steps       UATStep[]
+}
+
+model UATStep {
+  id          String   @id @default(cuid())
+  order       Int
+  action      String   @db.Text
+  expected    String   @db.Text
+  actual      String?  @db.Text
+  status      String   // NOT_TESTED, PASSED, FAILED
+  scenarioId  String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  scenario    UATScenario @relation(fields: [scenarioId], references: [id], onDelete: Cascade)
 }
