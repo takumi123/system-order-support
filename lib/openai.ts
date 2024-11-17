@@ -30,7 +30,7 @@ export interface GeneratedQuestion {
   question: string;
 }
 
-export async function generateRequirements(prompt: RequirementPrompt): Promise<GeneratedQuestion[]> {
+export async function generateRequirements(prompt: RequirementPrompt): Promise<string> {
   const { context, persona, product, count = 3 } = prompt;
 
   const systemPrompt = `Your goal is to generate questions from a user on a given product.
@@ -74,27 +74,7 @@ Example output format:
       throw new Error('No content returned from OpenAI');
     }
 
-    // JSONLをパースして質問の配列を返す
-    const questions: GeneratedQuestion[] = [];
-    const lines = content.split('\n').filter(line => line.trim());
-
-    for (const line of lines) {
-      try {
-        const parsed = JSON.parse(line);
-        if (typeof parsed.question === 'string') {
-          questions.push(parsed);
-        }
-      } catch (error) {
-        console.error('Failed to parse line:', line, error);
-        continue;
-      }
-    }
-
-    if (questions.length === 0) {
-      throw new Error('No valid questions were generated');
-    }
-
-    return questions;
+    return content;
   } catch (error) {
     console.error('OpenAI API error:', error);
     throw new Error('Failed to generate requirements: ' + (error as Error).message);

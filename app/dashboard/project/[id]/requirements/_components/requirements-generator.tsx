@@ -53,7 +53,7 @@ export default function RequirementsGenerator({ projectId }: RequirementsGenerat
         throw new Error(data.details || "要件の生成に失敗しました");
       }
 
-      setRawResponse(data.raw_response);
+      setRawResponse(data.content);
     } catch (error) {
       console.error("要件の生成に失敗しました:", error);
       setError(error instanceof Error ? error.message : "要件の生成に失敗しました");

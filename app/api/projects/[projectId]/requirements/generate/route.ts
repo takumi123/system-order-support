@@ -8,8 +8,8 @@ export async function POST(
     const body = await request.json();
     const prompt = body as RequirementPrompt;
 
-    const questions = await generateRequirements(prompt);
-    return NextResponse.json({ questions });
+    const content = await generateRequirements(prompt);
+    return NextResponse.json({ content });
 
   } catch (error) {
     console.error('Error generating requirements:', error);
@@ -19,5 +19,3 @@ export async function POST(
     );
   }
 }
-
-
