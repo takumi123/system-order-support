@@ -12,6 +12,7 @@
 - GCP Gemini,Azure OpenAI API連携
 - LP作成
 - ロゴ作成
+
 - Stripeサブスクリプション
  - プロジェクト単位の課金
 - 要件定義資料を、質問から作成
