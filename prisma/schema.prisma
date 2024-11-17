@@ -66,4 +66,53 @@ model Project {
   status      String   // ACTIVE, ARCHIVED, COMPLETED
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+
+  requirementCategories RequirementCategory[]
+  requirementDocuments  RequirementDocument[]
+}
+
+model RequirementCategory {
+  id          String   @id @default(cuid())
+  name        String
+  projectId   String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  project       Project                @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  subCategories RequirementSubCategory[]
+}
+
+model RequirementSubCategory {
+  id          String   @id @default(cuid())
+  name        String
+  content     String?  @db.Text
+  categoryId  String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  category    RequirementCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  tags        RequirementTag[]
+}
+
+model RequirementTag {
+  id             String   @id @default(cuid())
+  name           String
+  subCategoryId  String
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  subCategory    RequirementSubCategory @relation(fields: [subCategoryId], references: [id], onDelete: Cascade)
+}
+
+model RequirementDocument {
+  id          String   @id @default(cuid())
+  name        String
+  url         String
+  blobUrl     String
+  analysis    String?  @db.Text
+  projectId   String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
 }
