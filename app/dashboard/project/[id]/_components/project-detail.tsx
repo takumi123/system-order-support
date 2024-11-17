@@ -2,51 +2,52 @@
 
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { ArrowLeftIcon } from "@radix-ui/react-icons"
-import { useRouter } from "next/navigation"
 import { useState } from "react"
 import { ProjectEditDialog } from "@/app/dashboard/project/_components/project-edit-dialog"
 import { ProjectDeleteDialog } from "@/app/dashboard/project/_components/project-delete-dialog"
-import { Project } from "../types"
+import { Project } from "../../types"
 
 interface ProjectDetailProps {
   project: Project
 }
 
 export function ProjectDetail({ project }: ProjectDetailProps) {
-  const router = useRouter()
   const [isEditOpen, setIsEditOpen] = useState(false)
   const [isDeleteOpen, setIsDeleteOpen] = useState(false)
 
-  const getStatusBadgeVariant = (status: string) => {
+  const getStatusBadgeVariant = (status: Project["status"]) => {
     switch (status) {
-      case "進行中":
+      case "ACTIVE":
         return "default"
-      case "計画中":
+      case "ARCHIVED":
         return "secondary"
-      case "完了":
+      case "COMPLETED":
         return "outline"
       default:
         return "default"
     }
   }
 
-  return (
-    <div className="p-6">
-      <Button
-        variant="ghost"
-        className="mb-6"
-        onClick={() => router.push("/dashboard/project")}
-      >
-        <ArrowLeftIcon className="mr-2 h-4 w-4" />
-        プロジェクト一覧に戻る
-      </Button>
+  const getStatusLabel = (status: Project["status"]) => {
+    switch (status) {
+      case "ACTIVE":
+        return "進行中"
+      case "ARCHIVED":
+        return "アーカイブ"
+      case "COMPLETED":
+        return "完了"
+      default:
+        return status
+    }
+  }
 
+  return (
+    <div>
       <div className="flex justify-between items-start mb-8">
         <div>
           <h1 className="text-2xl font-bold mb-2">{project.name}</h1>
           <Badge variant={getStatusBadgeVariant(project.status)}>
-            {project.status}
+            {getStatusLabel(project.status)}
           </Badge>
         </div>
         <div className="space-x-2">
@@ -60,13 +61,20 @@ export function ProjectDetail({ project }: ProjectDetailProps) {
       <div className="grid gap-6">
         <div>
           <h2 className="text-lg font-semibold mb-2">プロジェクト概要</h2>
-          <p className="text-gray-600">{project.description}</p>
+          <p className="text-gray-600">{project.description || "説明なし"}</p>
         </div>
 
         <div>
-          <h2 className="text-lg font-semibold mb-2">期間</h2>
+          <h2 className="text-lg font-semibold mb-2">作成日時</h2>
           <p className="text-gray-600">
-            {project.createdAt.toLocaleDateString()} 〜 {project.updatedAt.toLocaleDateString()}
+            {new Date(project.createdAt).toLocaleString()}
+          </p>
+        </div>
+
+        <div>
+          <h2 className="text-lg font-semibold mb-2">更新日時</h2>
+          <p className="text-gray-600">
+            {new Date(project.updatedAt).toLocaleString()}
           </p>
         </div>
       </div>
