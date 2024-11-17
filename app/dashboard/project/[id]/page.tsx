@@ -1,30 +1,31 @@
-import { notFound } from "next/navigation"
 import { getProject } from "../_actions/project"
-import { Suspense } from "react"
-import { ProjectDetail } from "./_components/project-detail"
+import { ProjectDetail } from "./project-detail"
+import { notFound } from "next/navigation"
 
-interface PageProps {
-  params: {
-    id: string
+type PageProps = {
+  params: Promise<{ id: string }>
+}
+
+export async function generateMetadata({ params }: PageProps) {
+  const resolvedParams = await params
+  const { project } = await getProject(resolvedParams.id)
+  
+  return {
+    title: project ? `${project.name} | プロジェクト詳細` : "プロジェクト詳細",
   }
 }
 
-async function ProjectDetailWrapper({ id }: { id: string }) {
-  const { project, error } = await getProject(id)
+export default async function ProjectPage({ params }: PageProps) {
+  const resolvedParams = await params
+  const { project, error } = await getProject(resolvedParams.id)
 
-  if (error || !project) {
+  if (error) {
+    throw new Error(error)
+  }
+
+  if (!project) {
     notFound()
   }
 
   return <ProjectDetail project={project} />
-}
-
-export default function ProjectDetailPage({
-  params,
-}: PageProps) {
-  return (
-    <Suspense fallback={<div className="p-6">読み込み中...</div>}>
-      <ProjectDetailWrapper id={params.id} />
-    </Suspense>
-  )
 }

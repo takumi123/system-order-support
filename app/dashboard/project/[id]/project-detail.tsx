@@ -7,16 +7,7 @@ import { useRouter } from "next/navigation"
 import { useState } from "react"
 import { ProjectEditDialog } from "@/app/dashboard/project/_components/project-edit-dialog"
 import { ProjectDeleteDialog } from "@/app/dashboard/project/_components/project-delete-dialog"
-
-interface Project {
-  id: number
-  name: string
-  status: string
-  startDate: string
-  endDate: string
-  members: string[]
-  description: string
-}
+import { Project } from "../types"
 
 interface ProjectDetailProps {
   project: Project
@@ -75,13 +66,8 @@ export function ProjectDetail({ project }: ProjectDetailProps) {
         <div>
           <h2 className="text-lg font-semibold mb-2">期間</h2>
           <p className="text-gray-600">
-            {project.startDate} 〜 {project.endDate}
+            {project.createdAt.toLocaleDateString()} 〜 {project.updatedAt.toLocaleDateString()}
           </p>
-        </div>
-
-        <div>
-          <h2 className="text-lg font-semibold mb-2">メンバー</h2>
-          <p className="text-gray-600">{project.members.join("、")}</p>
         </div>
       </div>
 

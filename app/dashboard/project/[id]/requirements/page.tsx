@@ -9,16 +9,11 @@ export const metadata: Metadata = {
   description: "プロジェクトの要件定義を管理します",
 };
 
-interface RequirementsPageProps {
-  params: {
-    id: string;
-  };
-}
+type Params = Promise<{ id: string }>;
 
-export default async function RequirementsPage({
-  params,
-}: RequirementsPageProps) {
-  const { id } = await Promise.resolve(params);
+export default async function RequirementsPage(props: { params: Params }) {
+  const params = await props.params;
+  const { id } = params;
 
   const project = await prisma.project.findUnique({
     where: { id },

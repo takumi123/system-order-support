@@ -1,16 +1,26 @@
 import { put, del } from "@vercel/blob";
-import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { NextRequest, NextResponse } from "next/server";
+import { prisma } from "../../../../../lib/prisma";
 
-export async function POST(
-  req: Request,
-  { params }: { params: { projectId: string } }
-) {
+export async function POST(req: NextRequest) {
   try {
-    const { projectId } = await Promise.resolve(params);
+    // URLからprojectIdを取得
+    const { pathname } = req.nextUrl;
+    const segments = pathname.split("/");
+    const projectIdIndex = segments.findIndex((seg) => seg === "projects") + 1;
+
+    if (projectIdIndex === 0 || projectIdIndex >= segments.length) {
+      return NextResponse.json(
+        { error: "プロジェクトIDが見つかりません" },
+        { status: 400 }
+      );
+    }
+
+    const projectId = segments[projectIdIndex];
+
     const formData = await req.formData();
     const file = formData.get("file") as File;
-    
+
     if (!file) {
       return NextResponse.json(
         { error: "ファイルが見つかりません" },
@@ -50,12 +60,22 @@ export async function POST(
   }
 }
 
-export async function GET(
-  _req: Request,
-  { params }: { params: { projectId: string } }
-) {
+export async function GET(req: NextRequest) {
   try {
-    const { projectId } = await Promise.resolve(params);
+    // URLからprojectIdを取得
+    const { pathname } = req.nextUrl;
+    const segments = pathname.split("/");
+    const projectIdIndex = segments.findIndex((seg) => seg === "projects") + 1;
+
+    if (projectIdIndex === 0 || projectIdIndex >= segments.length) {
+      return NextResponse.json(
+        { error: "プロジェクトIDが見つかりません" },
+        { status: 400 }
+      );
+    }
+
+    const projectId = segments[projectIdIndex];
+
     const documents = await prisma.requirementDocument.findMany({
       where: {
         projectId,
@@ -75,14 +95,11 @@ export async function GET(
   }
 }
 
-export async function DELETE(
-  req: Request,
-  { params }: { params: { projectId: string } }
-) {
+export async function DELETE(req: NextRequest) {
   try {
-    const { searchParams } = new URL(req.url);
+    const { searchParams } = req.nextUrl;
     const documentId = searchParams.get("documentId");
-    
+
     if (!documentId) {
       return NextResponse.json(
         { error: "ドキュメントIDが必要です" },

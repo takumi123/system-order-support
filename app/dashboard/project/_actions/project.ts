@@ -6,7 +6,16 @@ import { Project } from "../types"
 
 export async function getProjects() {
   try {
-    const projects = await prisma.project.findMany()
+    const projects = await prisma.project.findMany({
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        status: true,
+        createdAt: true,
+        updatedAt: true,
+      }
+    })
     return { projects }
   } catch (error) {
     return { error: `プロジェクトの取得に失敗しました: ${error instanceof Error ? error.message : String(error)}` }
@@ -16,10 +25,32 @@ export async function getProjects() {
 export async function getProject(id: string): Promise<{ project?: Project; error?: string }> {
   try {
     const project = await prisma.project.findUnique({
-      where: { id }
-    }) as Project | null
+      where: { id },
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        status: true,
+        createdAt: true,
+        updatedAt: true,
+      }
+    })
 
-    return { project: project || undefined }
+    if (!project) {
+      return { project: undefined }
+    }
+
+    // statusの型を明示的に変換
+    const formattedProject: Project = {
+      id: project.id,
+      name: project.name,
+      description: project.description,
+      status: project.status as "ACTIVE" | "ARCHIVED" | "COMPLETED",
+      createdAt: new Date(project.createdAt),
+      updatedAt: new Date(project.updatedAt)
+    }
+
+    return { project: formattedProject }
   } catch (error) {
     return { error: `プロジェクトの取得に失敗しました: ${error instanceof Error ? error.message : String(error)}` }
   }
@@ -36,6 +67,14 @@ export async function createProject(data: {
         name: data.name,
         description: data.description,
         status: data.status,
+      },
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        status: true,
+        createdAt: true,
+        updatedAt: true,
       }
     })
     revalidatePath("/dashboard/project")
@@ -54,12 +93,20 @@ export async function updateProject(
   }
 ) {
   try {
-    await prisma.project.update({
+    const project = await prisma.project.update({
       where: { id: projectId },
-      data
+      data,
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        status: true,
+        createdAt: true,
+        updatedAt: true,
+      }
     })
     revalidatePath("/dashboard/project")
-    return { success: true }
+    return { success: true, project }
   } catch (error) {
     return { error: `プロジェクトの更新に失敗しました: ${error instanceof Error ? error.message : String(error)}` }
   }
