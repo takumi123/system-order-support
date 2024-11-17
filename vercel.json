@@ -1,0 +1,15 @@
+{
+  "version": 2,
+  "buildCommand": "npm run build",
+  "installCommand": "npm install",
+  "framework": "nextjs",
+  "regions": ["hnd1"],
+  "env": {
+    "NEXTAUTH_URL": "https://${VERCEL_URL}",
+    "AUTH_SECRET": "${AUTH_SECRET}",
+    "GOOGLE_CLIENT_ID": "${GOOGLE_CLIENT_ID}",
+    "GOOGLE_CLIENT_SECRET": "${GOOGLE_CLIENT_SECRET}",
+    "POSTGRES_PRISMA_URL": "${POSTGRES_PRISMA_URL}",
+    "POSTGRES_URL_NON_POOLING": "${POSTGRES_URL_NON_POOLING}"
+  }
+}
